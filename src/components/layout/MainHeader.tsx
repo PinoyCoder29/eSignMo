@@ -55,7 +55,7 @@ export default function MainHeader() {
                   </Link>
                 </li>
               </ul>
-              <ul className="navbar-nav ms-auto text-center">
+              {/* <ul className="navbar-nav ms-auto text-center">
                 <li className="nav-item">
                   <Link
                     href="/user/auth/signUp"
@@ -70,7 +70,7 @@ export default function MainHeader() {
                     Sign In
                   </Link>
                 </li>
-              </ul>
+              </ul> */}
             </div>
           </div>
         </div>

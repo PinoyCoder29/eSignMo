@@ -1,28 +1,30 @@
-import MainHeader from "@/components/layout/MainHeader";
+"use client"
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { ReactNode, useState, useEffect } from "react";
 import Script from "next/script";
-  
-import { ReactNode } from "react";
+import MainHeader from '@/components/layout/MainHeader';
+import Splash from '@/components/Splash';
 
+export default function RootLayout({ children }: { children: ReactNode }) {
+  const [showSplash, setShowSplash] = useState(true);
 
-  export default function Layout({children}: {children: ReactNode}) {
-    return (
-      <>
-    <html>
-      <head>
-        <title>eSignMo</title>
-        <link rel="shortcut icon" href="/logo.png" type="image/x-icon" />
-      </head>
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 2000); // 2 seconds
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <html lang="en">
       <body>
+        {showSplash && <Splash/>}
         <MainHeader/>
         <main>{children}</main>
-      
-      <Script
+
+        <Script 
           src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" 
           strategy="beforeInteractive" 
         />
       </body>
-      </html>
-      </>
-    );
-  }
+    </html>
+  );
+}
