@@ -1,78 +1,56 @@
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function MainHeader() {
+  const pathname = usePathname();
+
   return (
     <>
-      <nav className="navbar navbar-expand-md navbar-light bg-light shadow">
+      {/* Desktop Navbar */}
+      <nav className="navbar navbar-expand-md navbar-light bg-light shadow d-none d-md-block">
         <div className="container">
           <h1 className="navbar-brand">eSignMo</h1>
-
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#offcanvasScrolling"
-            aria-controls="offcanvasScrolling"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-
-          <div
-            className="offcanvas offcanvas-start"
-            style={{ width: "50%" }}
-            data-bs-scroll="true"
-            data-bs-backdrop="false"
-            tabIndex={-1}
-            id="offcanvasScrolling"
-            aria-labelledby="offcanvasScrollingLabel"
-          >
-            <div className="offcanvas-header">
-              <h5 className="offcanvas-title" id="offcanvasScrollingLabel">
-                Menu
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="offcanvas"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="offcanvas-body">
-              <ul className="navbar-nav mx-auto d-flex text-center mb-2">
-                <li className="nav-item">
-                  <Link href="/" className="nav-link">
-                    Home
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link href="/about" className="nav-link">
-                    About Us
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link href="/contact" className="nav-link">
-                    Contact Us
-                  </Link>
-                </li>
-              </ul>
-              {/* <ul className="navbar-nav ms-auto text-center">
-                <li className="nav-item">
-                  <Link
-                    href="/user/auth/signUp"
-                    className="btn text-light"
-                    style={{ backgroundColor: "#19a65dff" }}
-                  >
-                    Get Started
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link href="/signIn" className="nav-link">
-                    Sign In
-                  </Link>
-                </li>
-              </ul> */}
-            </div>
+          <div className="collapse navbar-collapse show">
+            <ul className="navbar-nav ms-auto">
+              <li className="nav-item">
+                <Link href="/" className={`nav-link ${pathname === "/" ? "active" : ""}`}>
+                  Home
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link href="/about" className={`nav-link ${pathname === "/about" ? "active" : ""}`}>
+                  About Us
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link href="/contact" className={`nav-link ${pathname === "/contact" ? "active" : ""}`}>
+                  Contact Us
+                </Link>
+              </li>
+            </ul>
           </div>
+        </div>
+      </nav>
+
+      {/* Mobile Bottom Navbar with Logos (Shopee-style) */}
+      <nav className="navbar fixed-bottom navbar-light bg-light shadow d-md-none">
+        <div className="container d-flex justify-content-around">
+          <Link href="/" className={`text-center nav-link ${pathname === "/" ? "text-success" : "text-muted"}`}>
+            <i className="bi bi-house-door-fill fs-4"></i>
+            <div style={{ fontSize: "12px" }}>Home</div>
+          </Link>
+          <Link href="/about" className={`text-center nav-link ${pathname === "/about" ? "text-success" : "text-muted"}`}>
+            <i className="bi bi-info-circle-fill fs-4"></i>
+            <div style={{ fontSize: "12px" }}>About</div>
+          </Link>
+          <Link href="/contact" className={`text-center nav-link ${pathname === "/contact" ? "text-success" : "text-muted"}`}>
+            <i className="bi bi-envelope-fill fs-4"></i>
+            <div style={{ fontSize: "12px" }}>Contact</div>
+          </Link>
+          <Link href="/signIn" className={`text-center nav-link ${pathname === "/signIn" ? "text-success" : "text-muted"}`}>
+            <i className="bi bi-person-circle fs-4"></i>
+            <div style={{ fontSize: "12px" }}>Account</div>
+          </Link>
         </div>
       </nav>
     </>
