@@ -1,11 +1,9 @@
-import type { NextConfig } from "next";
-import withPWAInit from "next-pwa";
-
-const withPWA = withPWAInit({
+/** @type {import('next').NextConfig} */
+const withPWA = require("next-pwa")({
   dest: "public",
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === "development", // i-disable sa dev mode
+  disable: process.env.NODE_ENV === "development", // disable sa dev mode
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\/.*/i,
@@ -30,12 +28,7 @@ const withPWA = withPWAInit({
       },
     },
     {
-      urlPattern: ({ request }) =>
-        request.destination === "document" ||
-        request.destination === "script" ||
-        request.destination === "style" ||
-        request.destination === "image" ||
-        request.destination === "font",
+      urlPattern: /^https?.*/, // lahat ng requests (html, js, css, images, etc.)
       handler: "NetworkFirst",
       options: {
         cacheName: "offline-cache",
@@ -48,8 +41,8 @@ const withPWA = withPWAInit({
   ],
 });
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   reactStrictMode: true,
 };
 
-export default withPWA(nextConfig);
+module.exports = withPWA(nextConfig);
