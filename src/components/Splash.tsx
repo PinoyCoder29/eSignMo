@@ -1,6 +1,6 @@
 import Image from "next/image";
 import logo from "../app/logo.png";
-import logo2 from "../../public/image/logo2.png"
+// import logo2 from "../../public/image/logo2.png"
 
 export default function Splash() {
   return (
