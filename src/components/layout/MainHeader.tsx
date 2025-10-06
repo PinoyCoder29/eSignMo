@@ -20,7 +20,7 @@ export default function MainHeader() {
     return "/asl"; // default
   };
 
-  const [selectedChoice, setSelectedChoice] = useState("/asl");
+  const [selectedChoice, setSelectedChoice] = useState(getCurrentChoice());
 
   useEffect(() => {
     setMounted(true);
@@ -40,9 +40,7 @@ export default function MainHeader() {
 
   // Update selected choice when pathname changes
   useEffect(() => {
-    const choice = getCurrentChoice();
-    setSelectedChoice(choice);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setSelectedChoice(getCurrentChoice());
   }, [pathname]);
 
   const handleInstallClick = async () => {
