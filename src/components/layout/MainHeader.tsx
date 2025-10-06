@@ -2,14 +2,25 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function MainHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstall, setShowInstall] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  // Determine current selected choice based on pathname
+  const getCurrentChoice = () => {
+    if (pathname.startsWith("/asl")) return "/asl";
+    if (pathname.startsWith("/fsl")) return "/fsl";
+    if (pathname.startsWith("/other")) return "/other";
+    return "/asl"; // default
+  };
+
+  const [selectedChoice, setSelectedChoice] = useState(getCurrentChoice());
 
   useEffect(() => {
     setMounted(true);
@@ -27,6 +38,11 @@ export default function MainHeader() {
     };
   }, []);
 
+  // Update selected choice when pathname changes
+  useEffect(() => {
+    setSelectedChoice(getCurrentChoice());
+  }, [pathname]);
+
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
     await deferredPrompt.prompt();
@@ -39,6 +55,12 @@ export default function MainHeader() {
     }
     setDeferredPrompt(null);
     setShowInstall(false);
+  };
+
+  // Handle dropdown selection and navigate
+  const handleChoiceSelect = (choice: string) => {
+    setSelectedChoice(choice);
+    router.push(choice);
   };
 
   if (!mounted) {
@@ -55,10 +77,11 @@ export default function MainHeader() {
       <nav
         className="navbar navbar-expand-md navbar-light shadow d-none d-md-block"
         style={{
-          backgroundColor:
-            pathname === "/about" || pathname === "/fsl"
-              ? "skyblue"
-              : "#599636ff",
+          backgroundColor: pathname.startsWith("/fsl")
+            ? "skyblue"
+            : pathname.startsWith("/other")
+            ? "#ff9800"
+            : "#599636ff",
         }}
       >
         <div className="container">
@@ -68,7 +91,7 @@ export default function MainHeader() {
                 <Link
                   href="/asl"
                   className={`nav-link fw-bold fs-5 ${
-                    pathname === "/asl" ? "active text-white" : "text-dark"
+                    pathname.startsWith("/asl") ? "active text-white" : "text-dark"
                   }`}
                 >
                   ASL
@@ -78,60 +101,17 @@ export default function MainHeader() {
                 <Link
                   href="/fsl"
                   className={`nav-link fw-bold fs-5 ${
-                    pathname === "/fsl" ? "active text-white" : "text-dark"
+                    pathname.startsWith("/fsl") ? "active text-white" : "text-dark"
                   }`}
                 >
                   FSL
                 </Link>
               </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
-
-      {/* Mobile Top Navbar with eSIGN Mo + Dropdown */}
-      <nav className="navbar navbar-light bg-light shadow d-md-none">
-        <div className="container d-flex justify-content-between">
-          <h5 className="m-0 fw-bold text-success">eSIGN Mo</h5>
-          <div className="dropdown">
-            <button
-              className="btn btn-outline-success dropdown-toggle"
-              type="button"
-              id="dropdownMenuButton"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Choices
-            </button>
-            <ul
-              className="dropdown-menu dropdown-menu-end"
-              aria-labelledby="dropdownMenuButton"
-            >
-              <li>
-                <Link
-                  href="/asl"
-                  className={`dropdown-item ${
-                    pathname === "/asl" ? "active bg-success text-white" : ""
-                  }`}
-                >
-                  ASL
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/fsl"
-                  className={`dropdown-item ${
-                    pathname === "/fsl" ? "active bg-success text-white" : ""
-                  }`}
-                >
-                  FSL
-                </Link>
-              </li>
-              <li>
+              <li className="nav-item">
                 <Link
                   href="/other"
-                  className={`dropdown-item ${
-                    pathname === "/other" ? "active bg-success text-white" : ""
+                  className={`nav-link fw-bold fs-5 ${
+                    pathname.startsWith("/other") ? "active text-white" : "text-dark"
                   }`}
                 >
                   Other
@@ -142,52 +122,140 @@ export default function MainHeader() {
         </div>
       </nav>
 
+      {/* Mobile Top Navbar with eSIGN Mo + Dropdown */}
+      <nav 
+        className="navbar navbar-light shadow d-md-none"
+        style={{
+          backgroundColor: pathname.startsWith("/fsl")
+            ? "skyblue"
+            : pathname.startsWith("/other")
+            ? "#ff9800"
+            : "#599636ff",
+        }}
+      >
+        <div className="container d-flex justify-content-between">
+          <h5 className="m-0 fw-bold text-white">eSIGN Mo</h5>
+          <div className="dropdown">
+            <button
+              className="btn btn-outline-light dropdown-toggle"
+              type="button"
+              id="dropdownMenuButton"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              {selectedChoice === "/asl" && "ASL"}
+              {selectedChoice === "/fsl" && "FSL"}
+              {selectedChoice === "/other" && "Other"}
+            </button>
+            <ul
+              className="dropdown-menu dropdown-menu-end"
+              aria-labelledby="dropdownMenuButton"
+            >
+              <li>
+                <button
+                  className={`dropdown-item ${
+                    selectedChoice === "/asl" ? "active bg-success text-white" : ""
+                  }`}
+                  onClick={() => handleChoiceSelect("/asl")}
+                >
+                  ASL
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`dropdown-item ${
+                    selectedChoice === "/fsl" ? "active bg-success text-white" : ""
+                  }`}
+                  onClick={() => handleChoiceSelect("/fsl")}
+                >
+                  FSL
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`dropdown-item ${
+                    selectedChoice === "/other"
+                      ? "active bg-success text-white"
+                      : ""
+                  }`}
+                  onClick={() => handleChoiceSelect("/other")}
+                >
+                  Other
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
       {/* Mobile Bottom Navbar */}
-      <nav className="navbar fixed-bottom navbar-light bg-light shadow d-md-none">
+      <nav 
+        className="navbar fixed-bottom navbar-light shadow d-md-none"
+        style={{
+          backgroundColor: pathname.startsWith("/fsl")
+            ? "skyblue"
+            : pathname.startsWith("/other")
+            ? "#ff9800"
+            : pathname === "/about" || pathname === "/contact" || pathname === "/signIn"
+            ? "#f8f9fa"
+            : "#599636ff",
+        }}
+      >
         <div className="container d-flex justify-content-around">
           <Link
-            href="/"
-            className={`text-center nav-link ${
-              pathname === "/"
-                ? "text-white bg-success rounded px-2"
-                : "text-muted"
+            href={`${selectedChoice}/sign-to-text`}
+            className={`text-center nav-link position-relative ${
+              pathname.includes("/sign-to-text")
+                ? "text-white bg-dark bg-opacity-25 rounded px-2"
+                : "text-dark"
             }`}
+            title="Sign to Text"
+          >
+            <i className="bi bi-hand-index-thumb fs-4"></i>
+          </Link>
+          <Link
+            href={`${selectedChoice}/speech-to-sign`}
+            className={`text-center nav-link position-relative ${
+              pathname.includes("/speech-to-sign")
+                ? "text-white bg-dark bg-opacity-25 rounded px-2"
+                : "text-dark"
+            }`}
+            title="Speech to Sign"
+          >
+            <i className="bi bi-mic-fill fs-4"></i>
+          </Link>
+          <Link
+            href={selectedChoice}
+            className={`text-center nav-link position-relative ${
+              pathname === selectedChoice
+                ? "text-white bg-dark bg-opacity-25 rounded px-2"
+                : "text-dark"
+            }`}
+            title="Home"
           >
             <i className="bi bi-house-door-fill fs-4"></i>
-            <div style={{ fontSize: "12px" }}>Home</div>
           </Link>
           <Link
-            href="/about"
-            className={`text-center nav-link ${
-              pathname === "/about"
-                ? "text-white bg-success rounded px-2"
-                : "text-muted"
+            href={`${selectedChoice}/test`}
+            className={`text-center nav-link position-relative ${
+              pathname.includes("/test")
+                ? "text-white bg-dark bg-opacity-25 rounded px-2"
+                : "text-dark"
             }`}
+            title="Test"
           >
-            <i className="bi bi-info-circle-fill fs-4"></i>
-            <div style={{ fontSize: "12px" }}>About</div>
+            <i className="bi bi-clipboard-check fs-4"></i>
           </Link>
           <Link
-            href="/contact"
-            className={`text-center nav-link ${
-              pathname === "/contact"
-                ? "text-white bg-success rounded px-2"
-                : "text-muted"
+            href={`${selectedChoice}/learn`}
+            className={`text-center nav-link position-relative ${
+              pathname.includes("/learn")
+                ? "text-white bg-dark bg-opacity-25 rounded px-2"
+                : "text-dark"
             }`}
+            title="Learn"
           >
-            <i className="bi bi-envelope-fill fs-4"></i>
-            <div style={{ fontSize: "12px" }}>Contact</div>
-          </Link>
-          <Link
-            href="/signIn"
-            className={`text-center nav-link ${
-              pathname === "/signIn"
-                ? "text-white bg-success rounded px-2"
-                : "text-muted"
-            }`}
-          >
-            <i className="bi bi-person-circle fs-4"></i>
-            <div style={{ fontSize: "12px" }}>Account</div>
+            <i className="bi bi-book fs-4"></i>
           </Link>
         </div>
       </nav>
