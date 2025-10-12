@@ -203,7 +203,7 @@ export default function MainHeader() {
       >
         <div className="container d-flex justify-content-around">
           <Link
-            href={`${selectedChoice}/sign-to-text`}
+            href={`${selectedChoice}/signToText`}
             className={`text-center nav-link position-relative ${
               pathname.includes("/sign-to-text")
                 ? "text-white bg-dark bg-opacity-25 rounded px-2"
