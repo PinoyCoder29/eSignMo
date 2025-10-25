@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React, { useState } from "react";
 import {
   Search,
@@ -576,7 +577,7 @@ const LessonDetail: React.FC<{
               className="position-relative mb-3"
               style={{ borderRadius: "12px", overflow: "hidden" }}
             >
-              <img
+              <Image
                 src={lesson.imageUrl}
                 className="img-fluid w-100"
                 alt={lesson.title}
@@ -647,7 +648,7 @@ const LessonDetail: React.FC<{
                   className="mb-0 fst-italic"
                   style={{ color: "rgba(255, 255, 255, 0.7)" }}
                 >
-                  "{lesson.exampleSentence}"
+                  <p>{`"${lesson.exampleSentence}"`}</p>
                 </p>
               </div>
             )}
