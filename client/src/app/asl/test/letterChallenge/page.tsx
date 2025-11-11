@@ -1614,7 +1614,8 @@ export default function ProfessionalLMSQuiz() {
         </div>
       </div>
 
-      <style>{`
+      <style>
+        {`
         @keyframes feedbackPop {
           0% {
             transform: scale(0.8);
@@ -1656,7 +1657,8 @@ export default function ProfessionalLMSQuiz() {
             grid-template-columns: 1fr 1fr !important;
           }
         }
-      `}</style>
+      `}
+      </style>
     </div>
   );
 }

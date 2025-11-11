@@ -451,37 +451,37 @@ export default function SideBar() {
             </Link>
 
             <Link
-              href={`${selectedChoice}/speech-to-sign`}
+              href={`${selectedChoice}/speech_text_to_sign`}
               className="sidebar-link"
               style={{
                 display: "flex",
                 alignItems: "center",
                 padding: "1rem 1.5rem",
-                color: pathname.includes("/speech-to-sign")
+                color: pathname.includes("/speech_text_to_sign")
                   ? "white"
                   : "rgba(255, 255, 255, 0.7)",
                 textDecoration: "none",
-                fontWeight: pathname.includes("/speech-to-sign")
+                fontWeight: pathname.includes("/speech_text_to_sign")
                   ? "700"
                   : "600",
                 fontSize: "1rem",
                 transition: "all 0.3s ease",
-                background: pathname.includes("/speech-to-sign")
+                background: pathname.includes("/speech_text_to_sign")
                   ? theme.gradient
                   : "transparent",
-                borderLeft: pathname.includes("/speech-to-sign")
+                borderLeft: pathname.includes("/speech_text_to_sign")
                   ? `4px solid ${theme.light}`
                   : "4px solid transparent",
                 margin: "0.5rem 0",
               }}
               onMouseEnter={(e) => {
-                if (!pathname.includes("/speech-to-sign")) {
+                if (!pathname.includes("/speech_text_to_sign")) {
                   e.currentTarget.style.background = "rgba(255,255,255,0.1)";
                   e.currentTarget.style.paddingLeft = "2rem";
                 }
               }}
               onMouseLeave={(e) => {
-                if (!pathname.includes("/speech-to-sign")) {
+                if (!pathname.includes("/speech_text_to_sign")) {
                   e.currentTarget.style.background = "transparent";
                   e.currentTarget.style.paddingLeft = "1.5rem";
                 }
@@ -582,7 +582,7 @@ export default function SideBar() {
       </div>
 
       {/* Mobile Top Navbar */}
-            {/* Mobile Top Navbar */}
+      {/* Mobile Top Navbar */}
       <nav
         className="navbar shadow-lg d-md-none fixed-top"
         style={{
@@ -593,11 +593,13 @@ export default function SideBar() {
           padding: "0.75rem 1rem",
           top: "0",
           left: 0,
-          right: 0
+          right: 0,
         }}
       >
-        <div className="container-fluid d-flex justify-content-between align-items-center" style={{ paddingBottom: 13, margin: 0 }}>
-
+        <div
+          className="container-fluid d-flex justify-content-between align-items-center"
+          style={{ paddingBottom: 13, margin: 0 }}
+        >
           <div className="d-flex align-items-center">
             <div
               style={{
@@ -756,7 +758,7 @@ export default function SideBar() {
             </Link>
 
             <Link
-              href={`${selectedChoice}/speech-to-sign`}
+              href={`${selectedChoice}/speech_text_to_sign`}
               className="nav-icon-btn"
               style={{
                 textDecoration: "none",
@@ -766,14 +768,14 @@ export default function SideBar() {
                 flexDirection: "column",
                 alignItems: "center",
                 gap: "0.2rem",
-                background: pathname.includes("/speech-to-sign")
+                background: pathname.includes("/speech_text_to_sign")
                   ? theme.gradient
                   : "transparent",
-                color: pathname.includes("/speech-to-sign")
+                color: pathname.includes("/speech_text_to_sign")
                   ? "white"
                   : "rgba(255, 255, 255, 0.6)",
                 transition: "all 0.3s ease",
-                boxShadow: pathname.includes("/speech-to-sign")
+                boxShadow: pathname.includes("/speech_text_to_sign")
                   ? `0 4px 12px ${theme.glow}`
                   : "none",
                 flex: "0 0 60px",

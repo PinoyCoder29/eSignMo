@@ -82,7 +82,7 @@ export default function Test() {
                   textShadow: "0 2px 20px rgba(139, 92, 246, 0.3)",
                 }}
               >
-                ASL Learning Arena
+                ASL Test Arena
               </h1>
               <p
                 className="fs-5 mb-0"

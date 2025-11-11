@@ -716,7 +716,7 @@ export default function MainHeader() {
             </Link>
 
             <Link
-              href={`${selectedChoice}/speech-to-sign`}
+              href={`asl/speech_text_to_sign`}
               className="nav-icon-btn"
               style={{
                 textDecoration: "none",
@@ -726,14 +726,14 @@ export default function MainHeader() {
                 flexDirection: "column",
                 alignItems: "center",
                 gap: "0.2rem",
-                background: pathname.includes("/speech-to-sign")
+                background: pathname.includes("/speech_text_to_sign")
                   ? theme.gradient
                   : "transparent",
-                color: pathname.includes("/speech-to-sign")
+                color: pathname.includes("/speech_text_to_sign")
                   ? "white"
                   : "rgba(255, 255, 255, 0.6)",
                 transition: "all 0.3s ease",
-                boxShadow: pathname.includes("/speech-to-sign")
+                boxShadow: pathname.includes("/speech_text_to_sign")
                   ? `0 4px 12px ${theme.glow}`
                   : "none",
                 flex: "0 0 60px",
