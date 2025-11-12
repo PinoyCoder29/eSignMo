@@ -197,7 +197,7 @@ export default function Learn() {
                           detailed finger positions and practice guides
                         </p>
                         <Link
-                          href="/asl/learn/learnAlphabet"
+                          href="/ asl/learn/learnAlphabet"
                           className="btn btn-sm game-btn"
                           style={{
                             background: "rgba(255, 255, 255, 0.95)",

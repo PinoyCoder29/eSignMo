@@ -17,3 +17,14 @@ model Question {
   answer    String
   createdAt DateTime @default(now())
 }
+
+model WordQuestion {
+  id        Int      @id @default(autoincrement())
+  videoUrl  String
+  optionA   String
+  optionB   String
+  optionC   String
+  optionD   String
+  answer    String
+  createdAt DateTime @default(now())
+}

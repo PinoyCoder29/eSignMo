@@ -328,7 +328,7 @@ export default function Test() {
                           signs
                         </p>
                         <Link
-                          href="/quiz/words"
+                          href="/asl/test/wordChallenge"
                           className="btn btn-sm game-btn"
                           style={{
                             background: "rgba(255, 255, 255, 0.95)",
