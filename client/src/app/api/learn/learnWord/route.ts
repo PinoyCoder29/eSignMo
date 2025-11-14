@@ -3,13 +3,19 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// Define type for the raw query result
+type WordQuestionResult = {
+  answer: string;
+  videoUrl: string | null;
+};
+
 export async function GET() {
   try {
-    // Random 20
-    const questions = await prisma.$queryRaw`
-      SELECT * FROM "WordQuestion"
+    const questions = await prisma.$queryRaw<WordQuestionResult[]>`
+      SELECT "answer", "videoUrl"
+      FROM "WordQuestion"
       ORDER BY RANDOM()
-      LIMIT 20;
+      LIMIT 100;
     `;
 
     return NextResponse.json(questions);
@@ -27,11 +33,15 @@ export async function GET() {
 
 // const prisma = new PrismaClient();
 
-// // GET - Fetch all questions from DB
+// // GET - Fetch only answer and imageUrl from DB (A first)
 // export async function GET() {
 //   try {
 //     const questions = await prisma.wordQuestion.findMany({
-//       orderBy: { id: "desc" },
+//       orderBy: { id: "asc" },
+//       select: {
+//         answer: true,
+//         videoUrl: true,
+//       },
 //     });
 
 //     return NextResponse.json(questions);

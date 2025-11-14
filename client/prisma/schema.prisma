@@ -9,9 +9,9 @@ datasource db {
 
 model Question {
   id        Int      @id @default(autoincrement())
-  imageUrl  String
+  imageUrl  String                                
   optionA   String
-  optionB   String
+  optionB   String  
   optionC   String
   optionD   String
   answer    String

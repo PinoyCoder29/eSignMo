@@ -1,642 +1,706 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  Zap,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  X,
+  Play,
+  Pause,
+} from "lucide-react";
 
-interface Bird {
-  x: number;
-  y: number;
-  velocity: number;
+interface Question {
+  answer: string;
+  videoUrl: string;
 }
 
-interface Pipe {
-  x: number;
-  topHeight: number;
-  gap: number;
-  passed: boolean;
-}
-
-export default function FlappyBird() {
-  const [bird, setBird] = useState<Bird>({ x: 100, y: 250, velocity: 0 });
-  const [pipes, setPipes] = useState<Pipe[]>([]);
-  const [score, setScore] = useState(0);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [gameOver, setGameOver] = useState(false);
-  const [highScore, setHighScore] = useState(0);
-  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-
-  const gameLoopRef = useRef<number | null>(null);
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-
-  const GRAVITY = 0.5;
-  const JUMP_STRENGTH = -10;
-  const BIRD_SIZE = 40;
-  const PIPE_WIDTH = 60;
-  const PIPE_GAP = 180;
-  const PIPE_SPEED = 3;
-
-  // Responsive dimensions
-  useEffect(() => {
-    const updateDimensions = () => {
-      const maxWidth = Math.min(window.innerWidth - 20, 800);
-      const maxHeight = Math.min(window.innerHeight - 200, 600);
-      setDimensions({ width: maxWidth, height: maxHeight });
-    };
-
-    updateDimensions();
-    window.addEventListener("resize", updateDimensions);
-    return () => window.removeEventListener("resize", updateDimensions);
-  }, []);
-
-  // Initialize audio context
-  useEffect(() => {
-    const AudioContextClass =
-      window.AudioContext ||
-      (window as typeof window & { webkitAudioContext: typeof AudioContext })
-        .webkitAudioContext;
-    audioContextRef.current = new AudioContextClass();
-  }, []);
-
-  const createJumpSound = useCallback(() => {
-    if (!audioContextRef.current) return;
-
-    const audioContext = audioContextRef.current;
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.frequency.value = 400;
-    oscillator.type = "sine";
-
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioContext.currentTime + 0.1
-    );
-
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.1);
-  }, []);
-
-  const createHitSound = useCallback(() => {
-    if (!audioContextRef.current) return;
-
-    const audioContext = audioContextRef.current;
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.frequency.value = 100;
-    oscillator.type = "sawtooth";
-
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioContext.currentTime + 0.3
-    );
-
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.3);
-  }, []);
-
-  const createScoreSound = useCallback(() => {
-    if (!audioContextRef.current) return;
-
-    const audioContext = audioContextRef.current;
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.frequency.value = 800;
-    oscillator.type = "sine";
-
-    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioContext.currentTime + 0.15
-    );
-
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.15);
-  }, []);
+export default function LearnWords() {
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedWord, setSelectedWord] = useState<Question | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 
   useEffect(() => {
-    const savedHighScore = window.__flappyBirdHighScore;
-    if (savedHighScore) {
-      setHighScore(parseInt(savedHighScore));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (score > highScore) {
-      setHighScore(score);
-      window.__flappyBirdHighScore = score.toString();
-    }
-  }, [score, highScore]);
-
-  const jump = useCallback(() => {
-    if (!gameStarted) {
-      setGameStarted(true);
-      createJumpSound();
-      return;
-    }
-    if (gameOver) return;
-
-    createJumpSound();
-    setBird((prev) => ({ ...prev, velocity: JUMP_STRENGTH }));
-  }, [gameStarted, gameOver, createJumpSound]);
-
-  const checkCollision = useCallback(
-    (currentBird: Bird, currentPipes: Pipe[]): boolean => {
-      if (currentBird.y < 0 || currentBird.y + BIRD_SIZE > dimensions.height) {
-        return true;
+    async function fetchQuestions() {
+      try {
+        const res = await fetch("/api/learn/learnWord");
+        const data = await res.json();
+        setQuestions(data);
+      } catch (error) {
+        console.error("Failed to fetch questions:", error);
+      } finally {
+        setLoading(false);
       }
-
-      for (const pipe of currentPipes) {
-        if (
-          currentBird.x + BIRD_SIZE > pipe.x &&
-          currentBird.x < pipe.x + PIPE_WIDTH
-        ) {
-          if (
-            currentBird.y < pipe.topHeight ||
-            currentBird.y + BIRD_SIZE > pipe.topHeight + PIPE_GAP
-          ) {
-            return true;
-          }
-        }
-      }
-
-      return false;
-    },
-    [dimensions.height]
-  );
-
-  const resetGame = useCallback(() => {
-    setBird({ x: 100, y: dimensions.height / 2 - 50, velocity: 0 });
-    setPipes([]);
-    setScore(0);
-    setGameStarted(false);
-    setGameOver(false);
-  }, [dimensions.height]);
-
-  useEffect(() => {
-    if (!gameStarted || gameOver) return;
-
-    const gameLoop = () => {
-      setBird((prev) => {
-        const newVelocity = prev.velocity + GRAVITY;
-        const newY = prev.y + newVelocity;
-        return { ...prev, y: newY, velocity: newVelocity };
-      });
-
-      setPipes((prev) => {
-        let newPipes = prev.map((pipe) => ({
-          ...pipe,
-          x: pipe.x - PIPE_SPEED,
-        }));
-
-        newPipes = newPipes.filter((pipe) => pipe.x + PIPE_WIDTH > 0);
-
-        if (
-          newPipes.length === 0 ||
-          newPipes[newPipes.length - 1].x < dimensions.width - 300
-        ) {
-          const topHeight =
-            Math.random() * (dimensions.height - PIPE_GAP - 100) + 50;
-          newPipes.push({
-            x: dimensions.width,
-            topHeight,
-            gap: PIPE_GAP,
-            passed: false,
-          });
-        }
-
-        newPipes.forEach((pipe) => {
-          if (!pipe.passed && pipe.x + PIPE_WIDTH < 100) {
-            pipe.passed = true;
-            createScoreSound();
-            setScore((s) => s + 1);
-          }
-        });
-
-        return newPipes;
-      });
-
-      setBird((currentBird) => {
-        setPipes((currentPipes) => {
-          if (checkCollision(currentBird, currentPipes)) {
-            createHitSound();
-            setGameOver(true);
-          }
-          return currentPipes;
-        });
-        return currentBird;
-      });
-
-      gameLoopRef.current = requestAnimationFrame(gameLoop);
-    };
-
-    gameLoopRef.current = requestAnimationFrame(gameLoop);
-
-    return () => {
-      if (gameLoopRef.current) {
-        cancelAnimationFrame(gameLoopRef.current);
-      }
-    };
-  }, [
-    gameStarted,
-    gameOver,
-    dimensions,
-    checkCollision,
-    createScoreSound,
-    createHitSound,
-  ]);
-
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.code === "Space" || e.key === " ") {
-        e.preventDefault();
-        jump();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [jump]);
-
-  // Touch event handler
-  useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      e.preventDefault();
-      jump();
-    };
-
-    const canvas = canvasRef.current;
-    if (canvas) {
-      canvas.addEventListener("touchstart", handleTouchStart, {
-        passive: false,
-      });
-      return () => canvas.removeEventListener("touchstart", handleTouchStart);
     }
-  }, [jump]);
 
-  const scaleFactor = Math.min(dimensions.width / 800, dimensions.height / 600);
-  const birdSizeScaled = BIRD_SIZE * scaleFactor;
-  const pipeWidthScaled = PIPE_WIDTH * scaleFactor;
+    fetchQuestions();
+  }, []);
 
-  return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-dark p-2">
-      <div className="text-center w-100" style={{ maxWidth: "820px" }}>
-        <div className="card bg-secondary shadow-lg">
-          <div className="card-header bg-primary text-white py-2">
-            <div className="row align-items-center g-2">
-              <div className="col-4">
-                <div className="d-flex align-items-center justify-content-start gap-1">
-                  <span style={{ fontSize: "clamp(12px, 3vw, 20px)" }}>🏆</span>
-                  <span
-                    className="fw-bold"
-                    style={{ fontSize: "clamp(10px, 2.5vw, 16px)" }}
-                  >
-                    High: {highScore}
-                  </span>
-                </div>
-              </div>
-              <div className="col-4">
-                <h3
-                  className="mb-0 fw-bold"
-                  style={{ fontSize: "clamp(14px, 4vw, 24px)" }}
-                >
-                  🐦 Flappy Bird
-                </h3>
-              </div>
-              <div className="col-4">
-                <div className="d-flex align-items-center justify-content-end gap-1">
-                  <span style={{ fontSize: "clamp(12px, 3vw, 20px)" }}>⭐</span>
-                  <span
-                    className="fw-bold"
-                    style={{ fontSize: "clamp(10px, 2.5vw, 16px)" }}
-                  >
-                    Score: {score}
-                  </span>
-                </div>
-              </div>
-            </div>
+  const handleVideoPlay = () => {
+    if (videoRef) {
+      if (isPlaying) {
+        videoRef.pause();
+      } else {
+        videoRef.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!selectedWord) return;
+
+    try {
+      const word = selectedWord.answer.split("\n")[0].replace("Word: ", "");
+      const videoUrl = selectedWord.videoUrl;
+
+      const response = await fetch(videoUrl);
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+
+      const extension = videoUrl.split(".").pop()?.split("?")[0] || "mp4";
+      link.download = `ASL_Word_${word.replace(/\s+/g, "_")}.${extension}`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      setShowDownloadModal(false);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download video. Please try again.");
+    }
+  };
+
+  const handleNextLesson = () => {
+    if (currentIndex < questions.length - 1) {
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
+      setSelectedWord(questions[nextIndex]);
+      setIsPlaying(false);
+      if (videoRef) videoRef.pause();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handlePreviousLesson = () => {
+    if (currentIndex > 0) {
+      const prevIndex = currentIndex - 1;
+      setCurrentIndex(prevIndex);
+      setSelectedWord(questions[prevIndex]);
+      setIsPlaying(false);
+      if (videoRef) videoRef.pause();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const getRelatedLessons = () => {
+    const startIndex = Math.max(0, currentIndex - 1);
+    const endIndex = Math.min(questions.length, startIndex + 4);
+    return questions
+      .slice(startIndex, endIndex)
+      .filter((_, idx) => startIndex + idx !== currentIndex);
+  };
+
+  if (loading) {
+    return (
+      <div
+        className="min-vh-100 d-flex align-items-center justify-content-center"
+        style={{
+          background: "#1a1a1a",
+        }}
+      >
+        <div className="text-center">
+          <div
+            className="spinner-border text-info"
+            role="status"
+            style={{ width: "3rem", height: "3rem" }}
+          >
+            <span className="visually-hidden">Loading...</span>
           </div>
+          <p className="text-white mt-3 fs-5 fw-medium">Loading ASL Words...</p>
+        </div>
+      </div>
+    );
+  }
 
-          <div className="card-body p-0">
+  // Detail View
+  if (selectedWord) {
+    const word = selectedWord.answer.split("\n")[0].replace("Word: ", "");
+    const description = selectedWord.answer.split("\n").slice(1).join("\n");
+    const progress = ((currentIndex + 1) / questions.length) * 100;
+
+    return (
+      <div className="min-vh-100" style={{ background: "#1a1a1a" }}>
+        {/* Download Modal */}
+        {showDownloadModal && (
+          <div
+            className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+            style={{
+              background: "rgba(0, 0, 0, 0.75)",
+              zIndex: 9999,
+              backdropFilter: "blur(4px)",
+            }}
+            onClick={() => setShowDownloadModal(false)}
+          >
             <div
-              ref={canvasRef}
-              onClick={jump}
-              style={{
-                width: `${dimensions.width}px`,
-                height: `${dimensions.height}px`,
-                position: "relative",
-                background:
-                  "linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%)",
-                cursor: "pointer",
-                overflow: "hidden",
-                touchAction: "none",
-                margin: "0 auto",
-              }}
+              className="bg-white rounded-4 p-4 position-relative"
+              style={{ maxWidth: "400px", width: "90%" }}
+              onClick={(e) => e.stopPropagation()}
             >
-              {/* Clouds */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: `${50 * scaleFactor}px`,
-                  left: "10%",
-                  fontSize: `${40 * scaleFactor}px`,
-                  opacity: 0.7,
-                }}
+              <button
+                onClick={() => setShowDownloadModal(false)}
+                className="btn btn-link position-absolute top-0 end-0 text-dark p-2"
+                style={{ textDecoration: "none" }}
               >
-                ☁️
-              </div>
-              <div
-                style={{
-                  position: "absolute",
-                  top: `${120 * scaleFactor}px`,
-                  right: "15%",
-                  fontSize: `${50 * scaleFactor}px`,
-                  opacity: 0.7,
-                }}
-              >
-                ☁️
-              </div>
+                <X size={24} />
+              </button>
 
-              {/* Bird */}
-              <div
-                style={{
-                  position: "absolute",
-                  left: `${bird.x * scaleFactor}px`,
-                  top: `${bird.y * scaleFactor}px`,
-                  width: `${birdSizeScaled}px`,
-                  height: `${birdSizeScaled}px`,
-                  fontSize: `${40 * scaleFactor}px`,
-                  transform: `rotate(${Math.min(Math.max(bird.velocity * 3, -30), 90)}deg)`,
-                  transition: "transform 0.1s",
-                }}
-              >
-                🐦
-              </div>
-
-              {/* Pipes */}
-              {pipes.map((pipe, index) => (
-                <div key={index}>
-                  {/* Top Pipe */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: `${pipe.x * scaleFactor}px`,
-                      top: 0,
-                      width: `${pipeWidthScaled}px`,
-                      height: `${pipe.topHeight * scaleFactor}px`,
-                      background: "linear-gradient(to right, #2ecc71, #27ae60)",
-                      borderRadius: "0 0 10px 10px",
-                      borderWidth: "3px",
-                      borderStyle: "solid",
-                      borderColor: "#229954",
-                      boxShadow: "inset 0 -5px 10px rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        bottom: `${-20 * scaleFactor}px`,
-                        left: `${-5 * scaleFactor}px`,
-                        width: `${pipeWidthScaled + 10 * scaleFactor}px`,
-                        height: `${30 * scaleFactor}px`,
-                        background:
-                          "linear-gradient(to right, #27ae60, #229954)",
-                        borderRadius: "5px",
-                      }}
-                    />
-                  </div>
-
-                  {/* Bottom Pipe */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: `${pipe.x * scaleFactor}px`,
-                      top: `${(pipe.topHeight + PIPE_GAP) * scaleFactor}px`,
-                      width: `${pipeWidthScaled}px`,
-                      height: `${(dimensions.height / scaleFactor - pipe.topHeight - PIPE_GAP) * scaleFactor}px`,
-                      background: "linear-gradient(to right, #2ecc71, #27ae60)",
-                      borderRadius: "10px 10px 0 0",
-                      borderWidth: "3px",
-                      borderStyle: "solid",
-                      borderColor: "#229954",
-                      boxShadow: "inset 0 5px 10px rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: `${-20 * scaleFactor}px`,
-                        left: `${-5 * scaleFactor}px`,
-                        width: `${pipeWidthScaled + 10 * scaleFactor}px`,
-                        height: `${30 * scaleFactor}px`,
-                        background:
-                          "linear-gradient(to right, #27ae60, #229954)",
-                        borderRadius: "5px",
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-
-              {/* Ground */}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  width: "100%",
-                  height: `${50 * scaleFactor}px`,
-                  background: "linear-gradient(to bottom, #8B4513, #654321)",
-                  borderTopWidth: "3px",
-                  borderTopStyle: "solid",
-                  borderTopColor: "#A0522D",
-                }}
-              >
+              <div className="text-center mb-4">
                 <div
+                  className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
                   style={{
-                    width: "100%",
-                    height: `${10 * scaleFactor}px`,
+                    width: "64px",
+                    height: "64px",
                     background:
-                      "repeating-linear-gradient(90deg, #228B22, #228B22 20px, #32CD32 20px, #32CD32 40px)",
+                      "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
                   }}
-                />
+                >
+                  <Download size={32} color="white" />
+                </div>
+                <h3 className="fw-bold mb-2">Download Video</h3>
+                <p className="text-secondary mb-0">
+                  Download ASL sign for {word}
+                </p>
               </div>
 
-              {/* Start Screen */}
-              {!gameStarted && !gameOver && (
-                <div
+              <div className="d-flex gap-2">
+                <button
+                  onClick={() => setShowDownloadModal(false)}
+                  className="btn btn-outline-secondary flex-fill"
+                  style={{ borderRadius: "10px", padding: "12px" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDownload}
+                  className="btn flex-fill text-white"
                   style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    textAlign: "center",
-                    background: "rgba(0, 0, 0, 0.8)",
-                    padding: `${30 * scaleFactor}px ${50 * scaleFactor}px`,
-                    borderRadius: "20px",
-                    color: "white",
-                    maxWidth: "90%",
+                    borderRadius: "10px",
+                    padding: "12px",
+                    background:
+                      "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
+                    border: "none",
                   }}
                 >
-                  <h2
-                    className="mb-3 fw-bold"
-                    style={{ fontSize: "clamp(18px, 5vw, 32px)" }}
-                  >
-                    🐦 Flappy Bird
-                  </h2>
-                  <p
-                    className="mb-3"
-                    style={{ fontSize: "clamp(12px, 3vw, 20px)" }}
-                  >
-                    Tap o Press SPACE para Jump
-                  </p>
-                  <button
-                    className="btn btn-warning btn-lg fw-bold"
-                    onClick={jump}
-                    style={{ fontSize: "clamp(14px, 3.5vw, 18px)" }}
-                  >
-                    🎮 Simulan ang Laro
-                  </button>
-                </div>
-              )}
-
-              {/* Game Over Screen */}
-              {gameOver && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    textAlign: "center",
-                    background: "rgba(0, 0, 0, 0.9)",
-                    padding: `${40 * scaleFactor}px ${60 * scaleFactor}px`,
-                    borderRadius: "20px",
-                    color: "white",
-                    maxWidth: "90%",
-                  }}
-                >
-                  <h2
-                    className="mb-3 fw-bold text-danger"
-                    style={{ fontSize: "clamp(18px, 5vw, 32px)" }}
-                  >
-                    💀 Game Over!
-                  </h2>
-                  <div className="mb-4">
-                    <div
-                      className="mb-2"
-                      style={{ fontSize: "clamp(14px, 4vw, 24px)" }}
-                    >
-                      <span className="badge bg-warning text-dark">
-                        Score: {score}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: "clamp(12px, 3.5vw, 20px)" }}>
-                      <span className="badge bg-success">
-                        Best: {highScore}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    className="btn btn-success btn-lg fw-bold"
-                    onClick={resetGame}
-                    style={{ fontSize: "clamp(14px, 3.5vw, 18px)" }}
-                  >
-                    🔄 Maglaro Ulit
-                  </button>
-                </div>
-              )}
+                  Download
+                </button>
+              </div>
             </div>
           </div>
+        )}
 
-          <div className="card-footer bg-dark text-white py-2">
-            <div className="row text-center g-1">
-              <div className="col-6">
-                <small style={{ fontSize: "clamp(8px, 2vw, 12px)" }}>
-                  🖱️ Click o 👆 Tap para jump
-                </small>
+        {/* Hero Header with Back Button */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div className="container py-3">
+            <button
+              onClick={() => {
+                setSelectedWord(null);
+                setIsPlaying(false);
+                if (videoRef) videoRef.pause();
+              }}
+              className="btn btn-light d-flex align-items-center gap-2 fw-semibold mb-3"
+              style={{ borderRadius: "12px", padding: "10px 20px" }}
+            >
+              <ArrowLeft size={18} />
+              <span>Back to ASL Words</span>
+            </button>
+
+            <div className="d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center gap-3">
+                <span
+                  className="badge bg-white bg-opacity-25"
+                  style={{ padding: "6px 14px", fontSize: "0.875rem" }}
+                >
+                  Lesson {currentIndex + 1} of {questions.length}
+                </span>
+                <h1 className="display-4 fw-bold mb-0 text-white"> {word}</h1>
               </div>
-              <div className="col-6">
-                <small style={{ fontSize: "clamp(8px, 2vw, 12px)" }}>
-                  Iwasan ang pipes! 🚀
-                </small>
-              </div>
+              <span
+                className="badge bg-success"
+                style={{
+                  padding: "6px 16px",
+                  fontSize: "0.875rem",
+                  borderRadius: "10px",
+                }}
+              >
+                beginner
+              </span>
             </div>
           </div>
         </div>
 
-        <div className="mt-3 text-white">
-          <small
-            className="text-muted"
-            style={{ fontSize: "clamp(8px, 2vw, 12px)" }}
+        {/* Main Content */}
+        <div className="container py-3">
+          <div className="row g-3">
+            {/* Left Side - Video */}
+            <div className="col-lg-5">
+              <div
+                className="card border-0 h-100"
+                style={{
+                  background: "#2d3748",
+                  borderRadius: "20px",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  className="p-3 d-flex align-items-center justify-content-center position-relative"
+                  style={{ minHeight: "380px" }}
+                >
+                  <video
+                    ref={setVideoRef}
+                    src={selectedWord.videoUrl}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "350px",
+                      borderRadius: "12px",
+                    }}
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    onEnded={() => setIsPlaying(false)}
+                    loop
+                  />
+                  <button
+                    onClick={handleVideoPlay}
+                    className="btn btn-light position-absolute"
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                  </button>
+                </div>
+                <div className="p-3">
+                  <button
+                    onClick={() => setShowDownloadModal(true)}
+                    className="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2"
+                    style={{ borderRadius: "10px", padding: "10px" }}
+                  >
+                    <Download size={18} />
+                    <span>Download</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side - Description */}
+            <div className="col-lg-7">
+              <div
+                className="card border-0 text-white h-100"
+                style={{
+                  background: "#2d3748",
+                  borderRadius: "20px",
+                  padding: "1.5rem",
+                }}
+              >
+                <div className="mb-3 d-flex align-items-center gap-2 text-warning">
+                  <Zap size={18} fill="currentColor" />
+                  <span className="fw-semibold">Learn it now!</span>
+                </div>
+
+                <h2 className="h4 fw-bold mb-3">Description</h2>
+                <h1
+                  className="mb-3 lh-base text-center fw-bold"
+                  style={{ color: "#cbd5e0", fontSize: "60px" }}
+                >
+                  {word}
+                </h1>
+
+                <div
+                  className="p-3 rounded-3"
+                  style={{ background: "#1a202c" }}
+                >
+                  <h3 className="h6 fw-bold mb-3">Learning Tips</h3>
+                  <ul
+                    className="mb-0"
+                    style={{ paddingLeft: "1.5rem", color: "#cbd5e0" }}
+                  >
+                    <li className="mb-2">
+                      Practice the hand shape slowly at first
+                    </li>
+                    <li className="mb-2">
+                      Watch your hand position in a mirror
+                    </li>
+                    <li className="mb-0">
+                      Repeat 10-15 times for muscle memory
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <div className="mt-3">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <button
+                onClick={handlePreviousLesson}
+                disabled={currentIndex === 0}
+                className="btn btn-outline-light d-flex align-items-center gap-2"
+                style={{
+                  borderRadius: "10px",
+                  padding: "10px 20px",
+                  opacity: currentIndex === 0 ? 0.5 : 1,
+                  cursor: currentIndex === 0 ? "not-allowed" : "pointer",
+                }}
+              >
+                <ChevronLeft size={18} />
+                <span>Previous</span>
+              </button>
+
+              {/* Progress Bar */}
+              <div className="flex-grow-1 mx-4">
+                <div
+                  className="progress"
+                  style={{
+                    height: "8px",
+                    borderRadius: "4px",
+                    background: "#2d3748",
+                  }}
+                >
+                  <div
+                    className="progress-bar"
+                    role="progressbar"
+                    style={{
+                      width: `${progress}%`,
+                      background:
+                        "linear-gradient(90deg, #06b6d4 0%, #0891b2 100%)",
+                      borderRadius: "4px",
+                    }}
+                    aria-valuenow={progress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  ></div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleNextLesson}
+                disabled={currentIndex === questions.length - 1}
+                className="btn btn-light d-flex align-items-center gap-2"
+                style={{
+                  borderRadius: "10px",
+                  padding: "10px 20px",
+                  opacity: currentIndex === questions.length - 1 ? 0.5 : 1,
+                  cursor:
+                    currentIndex === questions.length - 1
+                      ? "not-allowed"
+                      : "pointer",
+                }}
+              >
+                <span>Next</span>
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+
+          {/* Related Lessons */}
+          <div className="mt-4">
+            <h2 className="h4 fw-bold text-white mb-3">Related Lessons</h2>
+            <div className="row g-3">
+              {getRelatedLessons().map((q, idx) => {
+                const relatedWord = q.answer
+                  .split("\n")[0]
+                  .replace("Word: ", "");
+                const relatedDescription = q.answer.split("\n")[1] || "";
+                const relatedIndex = questions.findIndex(
+                  (item) => item.answer === q.answer
+                );
+
+                return (
+                  <div key={idx} className="col-sm-6 col-lg-3">
+                    <div
+                      className="card border-0 h-100"
+                      style={{
+                        borderRadius: "14px",
+                        cursor: "pointer",
+                        transition: "transform 0.3s, box-shadow 0.3s",
+                        overflow: "hidden",
+                      }}
+                      onClick={() => {
+                        setCurrentIndex(relatedIndex);
+                        setSelectedWord(q);
+                        setIsPlaying(false);
+                        if (videoRef) videoRef.pause();
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "translateY(-6px)";
+                        e.currentTarget.style.boxShadow =
+                          "0 16px 32px rgba(0,0,0,0.5)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.boxShadow = "";
+                      }}
+                    >
+                      <div
+                        className="position-relative d-flex align-items-center justify-content-center"
+                        style={{
+                          height: "180px",
+                          background:
+                            "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)",
+                          padding: "1rem",
+                        }}
+                      >
+                        <video
+                          src={q.videoUrl}
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                            borderRadius: "8px",
+                          }}
+                          muted
+                        />
+                        <div
+                          className="position-absolute d-flex align-items-center justify-content-center"
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            background: "rgba(255,255,255,0.9)",
+                            borderRadius: "50%",
+                          }}
+                        >
+                          <Play size={20} />
+                        </div>
+                        <span
+                          className="badge bg-success position-absolute"
+                          style={{
+                            top: "10px",
+                            left: "10px",
+                            borderRadius: "6px",
+                            padding: "4px 10px",
+                            fontSize: "0.75rem",
+                          }}
+                        >
+                          beginner
+                        </span>
+                      </div>
+                      <div
+                        className="card-body"
+                        style={{ background: "#2d3748", padding: "1rem" }}
+                      >
+                        <h3 className="h6 fw-bold text-white mb-2">
+                          {relatedWord}
+                        </h3>
+                        <p
+                          className="card-text small mb-2"
+                          style={{
+                            color: "#cbd5e0",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: "2",
+                            WebkitBoxOrient: "vertical",
+                          }}
+                        >
+                          {relatedDescription}
+                        </p>
+                        <div className="d-flex align-items-center justify-content-between">
+                          <span className="text-white-50 small d-flex align-items-center gap-1">
+                            <Zap size={12} />2 min
+                          </span>
+                          <span className="text-info small fw-semibold">
+                            Learn →
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Grid View
+  return (
+    <div className="min-vh-100" style={{ background: "#1a1a1a" }}>
+      {/* Hero Header */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div className="container py-3">
+          {/* Back Button */}
+          <button
+            onClick={() => window.history.back()}
+            className="btn btn-light d-flex align-items-center gap-2 fw-semibold mb-3"
+            style={{ borderRadius: "10px", padding: "10px 20px" }}
           >
-            Made with TypeScript, React & Bootstrap
-          </small>
+            <ArrowLeft size={18} />
+            <span>Back</span>
+          </button>
+
+          <div className="row align-items-center">
+            <div className="col-lg-8">
+              <div className="d-flex align-items-center gap-3 mb-2">
+                <div className="bg-white bg-opacity-25 rounded-3 p-2">
+                  <span style={{ fontSize: "1.75rem" }}>👋</span>
+                </div>
+                <div>
+                  <h1 className="text-white fw-bold display-5 mb-1">
+                    ASL Words
+                  </h1>
+                  <p className="text-white fs-6 mb-0 opacity-75">
+                    Master common ASL words through interactive lessons
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-4">
+              <div
+                className="card border-0 bg-white bg-opacity-25 text-white text-center p-3"
+                style={{ borderRadius: "14px", backdropFilter: "blur(10px)" }}
+              >
+                <h2 className="display-4 fw-bold mb-0">{questions.length}</h2>
+                <p className="mb-0 text-uppercase fw-semibold small">
+                  Total Lessons
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <style jsx global>{`
-        @import url("https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css");
+      {/* Main Content */}
+      <div className="container py-4">
+        <div className="mb-3">
+          <h2 className="text-white fw-bold h4">All Lessons</h2>
+          <p className="text-white-50 small">
+            {questions.length} lessons available
+          </p>
+        </div>
 
-        body {
-          font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-          user-select: none;
-          -webkit-user-select: none;
-          -moz-user-select: none;
-          -ms-user-select: none;
-          overflow: hidden;
-        }
-
-        * {
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        .card {
-          border: none;
-          border-radius: 15px;
-          overflow: hidden;
-        }
-
-        .btn {
-          transition: transform 0.2s;
-        }
-
-        .btn:hover {
-          transform: scale(1.05);
-        }
-
-        .btn:active {
-          transform: scale(0.95);
-        }
-
-        @media (max-width: 768px) {
-          .card-header {
-            padding: 0.5rem !important;
-          }
-
-          .card-footer {
-            padding: 0.5rem !important;
-          }
-        }
-      `}</style>
+        <div className="row g-3">
+          {questions.map((q, index) => {
+            const word = q.answer.split("\n")[0].replace("Word: ", "");
+            const description = q.answer.split("\n")[1] || "";
+            return (
+              <div key={index} className="col-sm-6 col-md-4 col-lg-3">
+                <div
+                  className="card border-0 h-100 shadow-sm position-relative overflow-hidden"
+                  style={{
+                    borderRadius: "14px",
+                    cursor: "pointer",
+                    transition: "transform 0.3s, box-shadow 0.3s",
+                  }}
+                  onClick={() => {
+                    setCurrentIndex(index);
+                    setSelectedWord(q);
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-6px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 16px 32px rgba(0,0,0,0.3)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "";
+                  }}
+                >
+                  <div
+                    className="position-relative d-flex align-items-center justify-content-center"
+                    style={{
+                      height: "200px",
+                      background:
+                        "linear-gradient(135deg, #e0f2fe 0%, #273339ff 100%)",
+                      padding: "1rem",
+                    }}
+                  >
+                    <video
+                      src={q.videoUrl}
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain",
+                        borderRadius: "8px",
+                      }}
+                      muted
+                    />
+                    <div
+                      className="position-absolute d-flex align-items-center justify-content-center"
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        background: "rgba(255,255,255,0.9)",
+                        borderRadius: "50%",
+                      }}
+                    >
+                      <Play size={24} />
+                    </div>
+                    <span
+                      className="badge bg-success position-absolute"
+                      style={{
+                        top: "10px",
+                        left: "10px",
+                        borderRadius: "6px",
+                        padding: "4px 10px",
+                        fontSize: "0.75rem",
+                      }}
+                    >
+                      beginner
+                    </span>
+                  </div>
+                  <div className="card-body" style={{ padding: "1rem" }}>
+                    <h3 className="card-title fw-bold h6 mb-2">{word}</h3>
+                    <p
+                      className="card-text text-secondary small mb-0"
+                      style={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "-webkit-box",
+                        WebkitLineClamp: "2",
+                        WebkitBoxOrient: "vertical",
+                      }}
+                    >
+                      {description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
-}
-
-declare global {
-  interface Window {
-    __flappyBirdHighScore?: string;
-  }
 }

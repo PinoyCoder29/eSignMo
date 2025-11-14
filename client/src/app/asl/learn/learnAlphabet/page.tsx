@@ -26,7 +26,7 @@ export default function LearnAlphabet() {
   useEffect(() => {
     async function fetchQuestions() {
       try {
-        const res = await fetch("/api/learnAlphabet");
+        const res = await fetch("/api/learn/learnAlphabet");
         const data = await res.json();
         setQuestions(data);
       } catch (error) {

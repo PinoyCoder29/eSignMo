@@ -63,7 +63,7 @@ export default function SpeechTextToSign() {
         // Fetch both endpoints
         const [questionsRes, wordQuestionsRes] = await Promise.all([
           fetch("/api/speech_text_to_sign"),
-          fetch("/api/test/testWord"),
+          fetch("/api/learn/allWords"),
         ]);
 
         // Check if responses are OK
