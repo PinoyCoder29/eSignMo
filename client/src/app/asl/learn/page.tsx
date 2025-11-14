@@ -55,7 +55,10 @@ export default function Learn() {
           className="container"
           style={{ maxWidth: "1140px", position: "relative" }}
         >
-          <div className="row align-items-center">
+          <div
+            className="row align-items-center"
+            style={{ marginBottom: "-25px" }}
+          >
             <div className="col-lg-8">
               <div className="mb-3">
                 <span
@@ -75,7 +78,7 @@ export default function Learn() {
                 </span>
               </div>
               <h1
-                className="display-3 fw-bold text-white mb-3"
+                className=" fw-bold text-white mb-2"
                 style={{
                   letterSpacing: "-1px",
                   lineHeight: "0.8",
@@ -197,7 +200,7 @@ export default function Learn() {
                           detailed finger positions and practice guides
                         </p>
                         <Link
-                          href="/ asl/learn/learnAlphabet"
+                          href="/asl/learn/learnAlphabet"
                           className="btn btn-sm game-btn"
                           style={{
                             background: "rgba(255, 255, 255, 0.95)",
@@ -295,7 +298,7 @@ export default function Learn() {
                           essential signs for daily communication
                         </p>
                         <Link
-                          href="/learn/words"
+                          href="/asl/learn/learnWords"
                           className="btn btn-sm game-btn"
                           style={{
                             background: "rgba(255, 255, 255, 0.95)",

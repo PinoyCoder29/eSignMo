@@ -55,9 +55,12 @@ export default function Test() {
           className="container"
           style={{ maxWidth: "1140px", position: "relative" }}
         >
-          <div className="row align-items-center">
+          <div
+            className="row align-items-center"
+            style={{ marginBottom: "-25px" }}
+          >
             <div className="col-lg-8">
-              <div className="mb-3">
+              <div className="mb-2">
                 <span
                   className="badge"
                   style={{
@@ -75,7 +78,7 @@ export default function Test() {
                 </span>
               </div>
               <h1
-                className="display-3 fw-bold text-white mb-3"
+                className=" fw-bold text-white mb-2  "
                 style={{
                   letterSpacing: "-1px",
                   lineHeight: "0.8",
@@ -85,7 +88,7 @@ export default function Test() {
                 ASL Test Arena
               </h1>
               <p
-                className="fs-5 mb-0"
+                className="fs-5  mb-0"
                 style={{
                   maxWidth: "600px",
                   color: "rgba(255, 255, 255, 0.85)",
@@ -442,7 +445,7 @@ export default function Test() {
                           Count your way to success from 0 to 100 in ASL
                         </p>
                         <Link
-                          href="/quiz/numbers"
+                          href="/asl/test/phrasesChallenge"
                           className="btn btn-sm game-btn"
                           style={{
                             background: "rgba(255, 255, 255, 0.95)",

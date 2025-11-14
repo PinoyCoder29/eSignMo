@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   ArrowLeft,
-  Share2,
   Zap,
   ChevronLeft,
   ChevronRight,
@@ -11,10 +11,15 @@ import {
   X,
 } from "lucide-react";
 
+interface Question {
+  answer: string;
+  imageUrl: string;
+}
+
 export default function LearnAlphabet() {
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedLetter, setSelectedLetter] = useState<any>(null);
+  const [selectedLetter, setSelectedLetter] = useState<Question | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
 
@@ -121,11 +126,6 @@ export default function LearnAlphabet() {
   // Detail View
   if (selectedLetter) {
     const letter = selectedLetter.answer.split("\n")[0].replace("Letter ", "");
-    const description = selectedLetter.answer
-      .split("\n")
-      .slice(1)
-      .join("\n")
-      .trim();
     const progress = ((currentIndex + 1) / questions.length) * 100;
 
     return (
@@ -257,12 +257,13 @@ export default function LearnAlphabet() {
               >
                 <div
                   className="p-3 d-flex align-items-center justify-content-center"
-                  style={{ minHeight: "380px" }}
+                  style={{ minHeight: "380px", position: "relative" }}
                 >
-                  <img
+                  <Image
                     src={selectedLetter.imageUrl}
                     alt={`Sign for ${letter}`}
-                    className="img-fluid"
+                    width={350}
+                    height={350}
                     style={{
                       maxWidth: "100%",
                       maxHeight: "350px",
@@ -441,9 +442,11 @@ export default function LearnAlphabet() {
                           padding: "1rem",
                         }}
                       >
-                        <img
+                        <Image
                           src={q.imageUrl}
                           alt={`Sign for ${relatedLetter}`}
+                          width={180}
+                          height={180}
                           style={{
                             maxWidth: "100%",
                             maxHeight: "100%",
@@ -602,9 +605,11 @@ export default function LearnAlphabet() {
                       padding: "1rem",
                     }}
                   >
-                    <img
+                    <Image
                       src={q.imageUrl}
                       alt={`Sign for ${letter}`}
+                      width={200}
+                      height={200}
                       style={{
                         maxWidth: "100%",
                         maxHeight: "100%",

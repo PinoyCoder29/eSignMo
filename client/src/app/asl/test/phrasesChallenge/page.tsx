@@ -15,6 +15,10 @@ interface Pipe {
   passed: boolean;
 }
 
+interface SoundRef {
+  play: () => void;
+}
+
 export default function FlappyBird() {
   const [bird, setBird] = useState<Bird>({ x: 100, y: 250, velocity: 0 });
   const [pipes, setPipes] = useState<Pipe[]>([]);
@@ -27,6 +31,9 @@ export default function FlappyBird() {
   const gameLoopRef = useRef<number | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const jumpSoundRef = useRef<SoundRef | null>(null);
+  const hitSoundRef = useRef<SoundRef | null>(null);
+  const scoreSoundRef = useRef<SoundRef | null>(null);
 
   const GRAVITY = 0.5;
   const JUMP_STRENGTH = -10;
@@ -48,82 +55,84 @@ export default function FlappyBird() {
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  // Initialize audio context
+  // Initialize sounds
   useEffect(() => {
     const AudioContextClass =
       window.AudioContext ||
       (window as typeof window & { webkitAudioContext: typeof AudioContext })
         .webkitAudioContext;
-    audioContextRef.current = new AudioContextClass();
-  }, []);
+    const audioContext = new AudioContextClass();
+    audioContextRef.current = audioContext;
 
-  const createJumpSound = useCallback(() => {
-    if (!audioContextRef.current) return;
+    const createJumpSound = () => {
+      if (!audioContextRef.current) return;
 
-    const audioContext = audioContextRef.current;
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
 
-    oscillator.frequency.value = 400;
-    oscillator.type = "sine";
+      oscillator.frequency.value = 400;
+      oscillator.type = "sine";
 
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioContext.currentTime + 0.1
-    );
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.01,
+        audioContext.currentTime + 0.1
+      );
 
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.1);
-  }, []);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    };
 
-  const createHitSound = useCallback(() => {
-    if (!audioContextRef.current) return;
+    const createHitSound = () => {
+      if (!audioContextRef.current) return;
 
-    const audioContext = audioContextRef.current;
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
 
-    oscillator.frequency.value = 100;
-    oscillator.type = "sawtooth";
+      oscillator.frequency.value = 100;
+      oscillator.type = "sawtooth";
 
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioContext.currentTime + 0.3
-    );
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.01,
+        audioContext.currentTime + 0.3
+      );
 
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.3);
-  }, []);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    };
 
-  const createScoreSound = useCallback(() => {
-    if (!audioContextRef.current) return;
+    const createScoreSound = () => {
+      if (!audioContextRef.current) return;
 
-    const audioContext = audioContextRef.current;
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
 
-    oscillator.frequency.value = 800;
-    oscillator.type = "sine";
+      oscillator.frequency.value = 800;
+      oscillator.type = "sine";
 
-    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioContext.currentTime + 0.15
-    );
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.01,
+        audioContext.currentTime + 0.15
+      );
 
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.15);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.15);
+    };
+
+    jumpSoundRef.current = { play: createJumpSound };
+    hitSoundRef.current = { play: createHitSound };
+    scoreSoundRef.current = { play: createScoreSound };
   }, []);
 
   useEffect(() => {
@@ -143,14 +152,14 @@ export default function FlappyBird() {
   const jump = useCallback(() => {
     if (!gameStarted) {
       setGameStarted(true);
-      createJumpSound();
+      jumpSoundRef.current?.play();
       return;
     }
     if (gameOver) return;
 
-    createJumpSound();
+    jumpSoundRef.current?.play();
     setBird((prev) => ({ ...prev, velocity: JUMP_STRENGTH }));
-  }, [gameStarted, gameOver, createJumpSound]);
+  }, [gameStarted, gameOver]);
 
   const checkCollision = useCallback(
     (currentBird: Bird, currentPipes: Pipe[]): boolean => {
@@ -220,7 +229,7 @@ export default function FlappyBird() {
         newPipes.forEach((pipe) => {
           if (!pipe.passed && pipe.x + PIPE_WIDTH < 100) {
             pipe.passed = true;
-            createScoreSound();
+            scoreSoundRef.current?.play();
             setScore((s) => s + 1);
           }
         });
@@ -231,7 +240,7 @@ export default function FlappyBird() {
       setBird((currentBird) => {
         setPipes((currentPipes) => {
           if (checkCollision(currentBird, currentPipes)) {
-            createHitSound();
+            hitSoundRef.current?.play();
             setGameOver(true);
           }
           return currentPipes;
@@ -249,14 +258,7 @@ export default function FlappyBird() {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [
-    gameStarted,
-    gameOver,
-    dimensions,
-    checkCollision,
-    createScoreSound,
-    createHitSound,
-  ]);
+  }, [gameStarted, gameOver, dimensions, checkCollision]);
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

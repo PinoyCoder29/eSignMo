@@ -464,8 +464,10 @@ export default function ASLVideoQuiz() {
             style={{
               width: "3rem",
               height: "3rem",
-              border: "4px solid rgba(102, 126, 234, 0.3)",
-              borderTop: "4px solid #667eea",
+              borderWidth: "4px",
+              borderStyle: "solid",
+              borderColor: "rgba(102, 126, 234, 0.3)",
+              borderTopColor: "#667eea",
               borderRadius: "50%",
               animation: "spin 1s linear infinite",
               margin: "0 auto",
@@ -502,7 +504,9 @@ export default function ASLVideoQuiz() {
           <div
             style={{
               background: "rgba(255, 255, 255, 0.05)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderWidth: "1px",
+              borderStyle: "solid",
+              borderColor: "rgba(255, 255, 255, 0.1)",
               borderRadius: "16px",
               padding: "2.5rem",
               backdropFilter: "blur(10px)",
@@ -619,8 +623,12 @@ export default function ASLVideoQuiz() {
                 gap: "1rem",
                 marginBottom: "1.5rem",
                 padding: "1.5rem 0",
-                borderTop: "2px solid rgba(255, 255, 255, 0.1)",
-                borderBottom: "2px solid rgba(255, 255, 255, 0.1)",
+                borderTopWidth: "2px",
+                borderTopStyle: "solid",
+                borderTopColor: "rgba(255, 255, 255, 0.1)",
+                borderBottomWidth: "2px",
+                borderBottomStyle: "solid",
+                borderBottomColor: "rgba(255, 255, 255, 0.1)",
               }}
             >
               <div style={{ textAlign: "center" }}>
@@ -654,7 +662,8 @@ export default function ASLVideoQuiz() {
                 padding: "1rem",
                 background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 color: "#fff",
-                border: "none",
+                borderWidth: "0",
+                borderStyle: "none",
                 borderRadius: "8px",
                 fontWeight: "700",
                 fontSize: "1.1rem",
@@ -711,7 +720,9 @@ export default function ASLVideoQuiz() {
           <div
             style={{
               background: "rgba(255, 255, 255, 0.05)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderWidth: "1px",
+              borderStyle: "solid",
+              borderColor: "rgba(255, 255, 255, 0.1)",
               borderRadius: "16px",
               padding: "2.5rem",
               backdropFilter: "blur(10px)",
@@ -749,7 +760,9 @@ export default function ASLVideoQuiz() {
               style={{
                 textAlign: "center",
                 padding: "2rem",
-                border: `3px solid ${gradeColor}`,
+                borderWidth: "3px",
+                borderStyle: "solid",
+                borderColor: gradeColor,
                 borderRadius: "12px",
                 background: "rgba(0, 0, 0, 0.3)",
                 marginBottom: "2rem",
@@ -879,7 +892,11 @@ export default function ASLVideoQuiz() {
                         marginBottom: "0.75rem",
                         borderRadius: "8px",
                         background: "rgba(255, 255, 255, 0.05)",
-                        borderLeft: `4px solid ${userAnswer?.isCorrect ? "#10b981" : "#ef4444"}`,
+                        borderLeftWidth: "4px",
+                        borderLeftStyle: "solid",
+                        borderLeftColor: userAnswer?.isCorrect
+                          ? "#10b981"
+                          : "#ef4444",
                       }}
                     >
                       <div style={{ display: "flex", gap: "1rem" }}>
@@ -921,7 +938,8 @@ export default function ASLVideoQuiz() {
                 padding: "1rem",
                 background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 color: "#fff",
-                border: "none",
+                borderWidth: "0",
+                borderStyle: "none",
                 borderRadius: "8px",
                 fontWeight: "700",
                 fontSize: "1.1rem",
@@ -973,7 +991,9 @@ export default function ASLVideoQuiz() {
       <div
         style={{
           background: "rgba(255, 255, 255, 0.05)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+          borderBottomWidth: "1px",
+          borderBottomStyle: "solid",
+          borderBottomColor: "rgba(255, 255, 255, 0.1)",
           backdropFilter: "blur(10px)",
         }}
       >
@@ -992,7 +1012,8 @@ export default function ASLVideoQuiz() {
               onClick={handleBackClick}
               style={{
                 background: "none",
-                border: "none",
+                borderWidth: "0",
+                borderStyle: "none",
                 color: "#fff",
                 fontSize: "1.5rem",
                 cursor: "pointer",
@@ -1050,7 +1071,9 @@ export default function ASLVideoQuiz() {
                   padding: "0.75rem 1.5rem",
                   background: "rgba(255, 255, 255, 0.1)",
                   color: "#fff",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  borderWidth: "1px",
+                  borderStyle: "solid",
+                  borderColor: "rgba(255, 255, 255, 0.2)",
                   borderRadius: "8px",
                   fontWeight: "600",
                   cursor: "pointer",
@@ -1064,7 +1087,8 @@ export default function ASLVideoQuiz() {
                   padding: "0.75rem 1.5rem",
                   background: "#ef4444",
                   color: "#fff",
-                  border: "none",
+                  borderWidth: "0",
+                  borderStyle: "none",
                   borderRadius: "8px",
                   fontWeight: "600",
                   cursor: "pointer",
@@ -1098,7 +1122,9 @@ export default function ASLVideoQuiz() {
           <div
             style={{
               background: "rgba(255, 255, 255, 0.05)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderWidth: "1px",
+              borderStyle: "solid",
+              borderColor: "rgba(255, 255, 255, 0.1)",
               borderRadius: "16px",
               backdropFilter: "blur(10px)",
               maxWidth: "500px",
@@ -1111,7 +1137,9 @@ export default function ASLVideoQuiz() {
             <div
               style={{
                 padding: "1rem 1.5rem",
-                borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                borderBottomWidth: "1px",
+                borderBottomStyle: "solid",
+                borderBottomColor: "rgba(255, 255, 255, 0.1)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -1124,7 +1152,8 @@ export default function ASLVideoQuiz() {
                 onClick={() => setShowNavigation(false)}
                 style={{
                   background: "none",
-                  border: "none",
+                  borderWidth: "0",
+                  borderStyle: "none",
                   color: "#fff",
                   fontSize: "1.5rem",
                   cursor: "pointer",
@@ -1154,7 +1183,9 @@ export default function ASLVideoQuiz() {
                       onClick={() => jumpToQuestion(idx)}
                       style={{
                         aspectRatio: "1",
-                        border: "2px solid rgba(255, 255, 255, 0.2)",
+                        borderWidth: "2px",
+                        borderStyle: "solid",
+                        borderColor: "rgba(255, 255, 255, 0.2)",
                         background:
                           currentIndex === idx
                             ? "#667eea"
@@ -1181,7 +1212,9 @@ export default function ASLVideoQuiz() {
               <div
                 style={{
                   paddingTop: "1.5rem",
-                  borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                  borderTopWidth: "1px",
+                  borderTopStyle: "solid",
+                  borderTopColor: "rgba(255, 255, 255, 0.1)",
                   display: "flex",
                   flexDirection: "column",
                   gap: "0.75rem",
@@ -1207,7 +1240,9 @@ export default function ASLVideoQuiz() {
                         height: "28px",
                         borderRadius: "6px",
                         background: item.color,
-                        border: "2px solid rgba(255, 255, 255, 0.2)",
+                        borderWidth: "2px",
+                        borderStyle: "solid",
+                        borderColor: "rgba(255, 255, 255, 0.2)",
                         flexShrink: 0,
                       }}
                     />
@@ -1237,7 +1272,9 @@ export default function ASLVideoQuiz() {
             <div
               style={{
                 background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "rgba(255, 255, 255, 0.1)",
                 borderRadius: "12px",
                 padding: "2rem",
                 backdropFilter: "blur(10px)",
@@ -1364,7 +1401,8 @@ export default function ASLVideoQuiz() {
                         onClick={togglePlayPause}
                         style={{
                           background: "rgba(255, 255, 255, 0.2)",
-                          border: "none",
+                          borderWidth: "0",
+                          borderStyle: "none",
                           borderRadius: "50%",
                           width: "40px",
                           height: "40px",
@@ -1412,7 +1450,8 @@ export default function ASLVideoQuiz() {
                         onClick={toggleMute}
                         style={{
                           background: "rgba(255, 255, 255, 0.2)",
-                          border: "none",
+                          borderWidth: "0",
+                          borderStyle: "none",
                           borderRadius: "50%",
                           width: "35px",
                           height: "35px",
@@ -1455,7 +1494,9 @@ export default function ASLVideoQuiz() {
                     gap: "0.75rem",
                     padding: "1rem",
                     background: "rgba(255, 255, 255, 0.05)",
-                    border: "2px solid rgba(90, 109, 109, 0.5)",
+                    borderWidth: "2px",
+                    borderStyle: "solid",
+                    borderColor: "rgba(90, 109, 109, 0.5)",
                     borderRadius: "10px",
                     cursor: isAnswered ? "not-allowed" : "pointer",
                     transition: "all 0.3s",
@@ -1561,7 +1602,9 @@ export default function ASLVideoQuiz() {
                       feedback === "correct"
                         ? "linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%)"
                         : "linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%)",
-                    border: `2px solid ${feedback === "correct" ? "#10b981" : "#ef4444"}`,
+                    borderWidth: "2px",
+                    borderStyle: "solid",
+                    borderColor: feedback === "correct" ? "#10b981" : "#ef4444",
                     animation: showFeedbackAnimation
                       ? "feedbackPop 0.5s ease"
                       : "none",
@@ -1608,7 +1651,9 @@ export default function ASLVideoQuiz() {
             <div
               style={{
                 background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "rgba(255, 255, 255, 0.1)",
                 borderRadius: "12px",
                 padding: "1rem",
                 marginTop: "1rem",
@@ -1626,7 +1671,9 @@ export default function ASLVideoQuiz() {
                         ? "rgba(255, 255, 255, 0.05)"
                         : "rgba(255, 255, 255, 0.1)",
                     color: currentIndex === 0 ? "#64748b" : "#fff",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    borderWidth: "1px",
+                    borderStyle: "solid",
+                    borderColor: "rgba(255, 255, 255, 0.2)",
                     borderRadius: "8px",
                     fontWeight: "600",
                     cursor: currentIndex === 0 ? "not-allowed" : "pointer",
@@ -1641,7 +1688,9 @@ export default function ASLVideoQuiz() {
                     padding: "0.75rem 1.25rem",
                     background: "rgba(255, 255, 255, 0.1)",
                     color: "#fff",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    borderWidth: "1px",
+                    borderStyle: "solid",
+                    borderColor: "rgba(255, 255, 255, 0.2)",
                     borderRadius: "8px",
                     fontWeight: "600",
                     cursor: "pointer",
@@ -1663,7 +1712,8 @@ export default function ASLVideoQuiz() {
                         ? "linear-gradient(135deg, #10b981, #059669)"
                         : "linear-gradient(135deg, #667eea, #764ba2)",
                     color: !isAnswered ? "#64748b" : "#fff",
-                    border: "none",
+                    borderWidth: "0",
+                    borderStyle: "none",
                     borderRadius: "8px",
                     fontWeight: "600",
                     cursor: !isAnswered ? "not-allowed" : "pointer",
@@ -1682,7 +1732,9 @@ export default function ASLVideoQuiz() {
             <div
               style={{
                 background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "rgba(255, 255, 255, 0.1)",
                 borderRadius: "12px",
                 backdropFilter: "blur(10px)",
                 position: "sticky",
@@ -1694,7 +1746,9 @@ export default function ASLVideoQuiz() {
               <div
                 style={{
                   padding: "1rem",
-                  borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                  borderBottomWidth: "1px",
+                  borderBottomStyle: "solid",
+                  borderBottomColor: "rgba(255, 255, 255, 0.1)",
                 }}
               >
                 <h6
@@ -1721,7 +1775,9 @@ export default function ASLVideoQuiz() {
                         onClick={() => jumpToQuestion(idx)}
                         style={{
                           aspectRatio: "1",
-                          border: "2px solid rgba(255, 255, 255, 0.2)",
+                          borderWidth: "2px",
+                          borderStyle: "solid",
+                          borderColor: "rgba(255, 255, 255, 0.2)",
                           background:
                             currentIndex === idx
                               ? "#667eea"
@@ -1758,7 +1814,9 @@ export default function ASLVideoQuiz() {
                   style={{
                     marginTop: "1.5rem",
                     paddingTop: "1.5rem",
-                    borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderTopWidth: "1px",
+                    borderTopStyle: "solid",
+                    borderTopColor: "rgba(255, 255, 255, 0.1)",
                     display: "flex",
                     flexDirection: "column",
                     gap: "0.75rem",
@@ -1784,7 +1842,9 @@ export default function ASLVideoQuiz() {
                           height: "24px",
                           borderRadius: "4px",
                           background: item.color,
-                          border: "2px solid rgba(255, 255, 255, 0.2)",
+                          borderWidth: "2px",
+                          borderStyle: "solid",
+                          borderColor: "rgba(255, 255, 255, 0.2)",
                           flexShrink: 0,
                         }}
                       />
