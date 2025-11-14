@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const questions = await prisma.wordQuestion.findMany({
-      orderBy: { id: "asc" }, // 👈 change to ascending
+      orderBy: { id: "asc" },
       select: {
         answer: true,
         videoUrl: true,
