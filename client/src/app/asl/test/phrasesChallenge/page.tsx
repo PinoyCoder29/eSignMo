@@ -509,7 +509,7 @@ export default function FlappyBird() {
                     onClick={jump}
                     style={{ fontSize: "clamp(14px, 3.5vw, 18px)" }}
                   >
-                    🎮 Simulan ang Laro
+                    🎮 Start the game
                   </button>
                 </div>
               )}
@@ -556,7 +556,7 @@ export default function FlappyBird() {
                     onClick={resetGame}
                     style={{ fontSize: "clamp(14px, 3.5vw, 18px)" }}
                   >
-                    🔄 Maglaro Ulit
+                    🔄 Play again
                   </button>
                 </div>
               )}

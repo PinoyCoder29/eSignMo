@@ -3,11 +3,11 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// GET - Fetch only answer and imageUrl from DB (A first)
 export async function GET() {
   try {
     const questions = await prisma.wordQuestion.findMany({
       orderBy: { id: "asc" },
-      take: 100,
       select: {
         answer: true,
         videoUrl: true,

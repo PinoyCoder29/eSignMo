@@ -12,7 +12,9 @@ export default function Home() {
               </p>
               <button className="btn btn-primary px-5">Explore</button>
             </div>
-            <div className="col-md-6"></div>
+            <div className="col-md-6">
+              <div>h</div>
+            </div>
           </div>
         </div>
       </section>
